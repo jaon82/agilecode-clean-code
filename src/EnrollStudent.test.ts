@@ -8,7 +8,7 @@ test("Should not enroll without valid student name", function () {
             cpf: "832.081.519-34"
         }
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid student name"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid name"))
 });
 
 test("Should not enroll without valid student cpf", function () {
@@ -19,7 +19,7 @@ test("Should not enroll without valid student cpf", function () {
             cpf: "123.456.789-99"
         }
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid student CPF"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid CPF"))
 });
 
 test("Should not enroll duplicated student", function () {

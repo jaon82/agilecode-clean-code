@@ -1,4 +1,4 @@
-import validateCpf from "./validateCPF";
+import Student from "./Student";
 
 interface IStudent{
     name: string,
@@ -9,41 +9,30 @@ interface IEnrollmentRequest{
     student: IStudent
 }
 
+interface IEnrollment{
+    student: Student
+}
+
 export default class EnrollStudent {
-    students: IStudent[] = [];
+    enrollments: IEnrollment[] = [];
 
     constructor () {
-        this.students = [];
-    }
-
-    validateName(name: string){
-        if(!/^([A-Za-z]+ )+([A-Za-z])+$/.test(name)){
-            return false;
-        }
-        return true;
+        this.enrollments = [];
     }
 
     checkStudentExists(cpf: string): boolean {
-        return !!this.students.find(student => student.cpf === cpf);
+        return !!this.enrollments.find(enrollment => enrollment.student.cpf.value === cpf);
     }
 
-    execute(enrollmentRequest: IEnrollmentRequest) : IStudent[] {
-        const student = enrollmentRequest.student;
-
-        if(!this.validateName(student.name)){
-           throw new Error("Invalid student name");
-        }
-
-        if(!validateCpf(student.cpf)){
-            throw new Error("Invalid student CPF");
-        }
-
-        if(this.checkStudentExists(student.cpf)){
+    execute(enrollmentRequest: IEnrollmentRequest) : IEnrollment {
+        const student = new Student(enrollmentRequest.student.name, enrollmentRequest.student.cpf);
+        if(this.checkStudentExists(student.cpf.value)){
             throw new Error("Enrollment with duplicated student is not allowed");
         }
-
-        this.students.push(student);
-
-        return this.students;
+        const enrollment = {
+            student
+        };
+        this.enrollments.push(enrollment);
+        return enrollment;
     }
 }
