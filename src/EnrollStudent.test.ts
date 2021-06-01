@@ -59,7 +59,7 @@ test("Should generate enrollment code", function () {
         class: "A"
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
-    expect(enrollment.enrollmentCode).toEqual("2021EM1A0001");
+    expect(enrollment.code).toEqual("2021EM1A0001");
 });
 
 test("Should generate enrollment codes", function () {
@@ -75,7 +75,7 @@ test("Should generate enrollment codes", function () {
         class: "A"
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
-    expect(enrollment.enrollmentCode).toEqual("2021EM1A0001");
+    expect(enrollment.code).toEqual("2021EM1A0001");
 
     const enrollmentRequest2 = {
         student: {
@@ -88,7 +88,22 @@ test("Should generate enrollment codes", function () {
         class: "A"
     };
     const enrollment2= enrollStudent.execute(enrollmentRequest2);
-    expect(enrollment2.enrollmentCode).toEqual("2021EM1A0002");
+    expect(enrollment2.code).toEqual("2021EM1A0002");
+});
+
+test("Should not enroll student with invalid level", function () {
+    const enrollStudent = new EnrollStudent();
+    const enrollmentRequest = {
+        student: {
+            name: "Maria Carolina Fonseca",
+            cpf: "755.525.774-26",
+            birthDate: "2000-03-12"
+        },
+        level: "ES",
+        module: "4",
+        class: "A"
+    };
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Level not found"))
 });
 
 test("Should not enroll student with invalid module", function () {
