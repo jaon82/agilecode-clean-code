@@ -12,5 +12,7 @@ export default class Student {
          this.birthDate = new Date(birthDate);
     }
 
-    
+    getAge(){
+        return Math.floor((Date.now()-this.birthDate.getTime())/(1000 * 60 * 60 * 24 * 365.25));
+    }   
 }

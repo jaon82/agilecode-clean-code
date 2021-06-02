@@ -1,65 +1,71 @@
-import data from "./data";
+import Enrollment from "./Enrollment";
+import IClassRepository from "./IClassRepository";
+import IEnrollmentRepository from "./IEnrollmentRepository";
+import ILevelRepository from "./ILevelRepository";
+import IModuleRepository from "./IModuleRepository";
 import Student from "./Student";
 
-interface IStudent{
+interface IStudentRequest{
     name: string,
     cpf: string
     birthDate: string
 }
 
 interface IEnrollmentRequest{
-    student: IStudent
+    student: IStudentRequest
     level: string,
     module: string,
     class: string
 }
 
-interface IEnrollment{
-    student: Student
-    level: string,
-    module: string,
-    class: string,
-    code: string,
-}
-
 export default class EnrollStudent {
-    enrollments: IEnrollment[] = [];
+    levelRepository: ILevelRepository;
+    moduleRepository: IModuleRepository;
+    classRepository: IClassRepository;
+    enrollmentRepository: IEnrollmentRepository;
 
-    constructor () {
-        this.enrollments = [];
+    constructor (
+        levelRepository: ILevelRepository, 
+        moduleRepository: IModuleRepository, 
+        classRepository: IClassRepository, 
+        enrollmentRepository: IEnrollmentRepository
+    ) {
+        this.levelRepository = levelRepository;
+        this.moduleRepository = moduleRepository;
+        this.classRepository = classRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     existingEnrollment(cpf: string): boolean {
-        return !!this.enrollments.find(enrollment => enrollment.student.cpf.value === cpf);
+        return !!this.enrollmentRepository.findByCpf(cpf);
     }
 
     hasAllowedAge(student: Student, minimumAge: number): boolean {
-        const studentAge = Math.floor((Date.now()-(new Date(student.birthDate)).getTime())/(1000 * 60 * 60 * 24 * 365.25));
-        return studentAge >= minimumAge;
+        return student.getAge() >= minimumAge;
     }
 
     hasClassCapacity(classCapacity: number, level: string, moduleCode: string, classCode: string): boolean {
-        const studentsInClass = this.enrollments.filter(enrollment => enrollment.level === level && enrollment.module === moduleCode && enrollment.class === classCode);
+        const studentsInClass = this.enrollmentRepository.findAllByClass(level, moduleCode, classCode);
         return studentsInClass.length < classCapacity;
     }
 
     generateEnrollmentCode(enrollment: IEnrollmentRequest): string{
-        const sequence = (this.enrollments.length+1).toString().padStart(4,"0");
+        const sequence = (this.enrollmentRepository.count()+1).toString().padStart(4,"0");
         let enrollmentCode = `${(new Date()).getFullYear()}${enrollment.level}${enrollment.module}${enrollment.class}${sequence}`;
         return enrollmentCode;
     }
 
-    execute(enrollmentRequest: IEnrollmentRequest) : IEnrollment {
+    execute(enrollmentRequest: IEnrollmentRequest) : Enrollment {
         const student = new Student(enrollmentRequest.student.name, enrollmentRequest.student.cpf, enrollmentRequest.student.birthDate);
-        const level = data.levels.find(level => level.code === enrollmentRequest.level);
+        const level = this.levelRepository.findByCode(enrollmentRequest.level);
         if(!level){
             throw new Error("Level not found");
         }
-        const module = data.modules.find(module => module.level === level.code && module.code === enrollmentRequest.module);
+        const module = this.moduleRepository.findByCode(enrollmentRequest.level, enrollmentRequest.module);
         if(!module){
             throw new Error("Module not found");
         }
-        const clazz = data.classes.find(classData => classData.level === level.code && classData.module === module.code && classData.code === enrollmentRequest.class);
+        const clazz = this.classRepository.findByCode(level.code, module.code, enrollmentRequest.class);
         if(!clazz){
             throw new Error("Class not found");
         }
@@ -72,14 +78,9 @@ export default class EnrollStudent {
         if(!this.hasClassCapacity(clazz.capacity, enrollmentRequest.level, enrollmentRequest.module, enrollmentRequest.class)){
             throw new Error("Class is over capacity");
         }
-        const enrollment:IEnrollment = {
-            student,
-            level: level.code,
-            module: module.code,
-            class: clazz.code,
-            code: this.generateEnrollmentCode(enrollmentRequest)
-        };
-        this.enrollments.push(enrollment);
+        const code = this.generateEnrollmentCode(enrollmentRequest);
+        const enrollment = new Enrollment(student, level.code, module.code, clazz.code, code);
+        this.enrollmentRepository.save(enrollment);
         return enrollment;
     }
 }

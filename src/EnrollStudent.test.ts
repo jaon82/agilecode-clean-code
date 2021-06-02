@@ -1,7 +1,20 @@
+import ClassRepositoryMemory from "./ClassRepositoryMemory";
+import EnrollmentRepositoryMemory from "./EnrollmentRepositoryMemory";
 import EnrollStudent from "./EnrollStudent";
+import LevelRepositoryMemory from "./LevelRepositoryMemory";
+import ModuleRepositoryMemory from "./ModuleRepositoryMemory";
 
-test("Should not enroll without valid student name", function () {
-    const enrollStudent = new EnrollStudent();
+let enrollStudent: EnrollStudent;
+
+beforeEach(function () {
+    const enrollmentRepository = new EnrollmentRepositoryMemory();
+    const levelRepository = new LevelRepositoryMemory();
+    const moduleRepository = new ModuleRepositoryMemory();
+    const classRepository = new ClassRepositoryMemory();
+    enrollStudent = new EnrollStudent(levelRepository, moduleRepository, classRepository, enrollmentRepository);
+});
+
+test("Should not enroll without valid student name", function () {  
     const enrollmentRequest = {
         student: {
             name: "Ana",
@@ -15,8 +28,7 @@ test("Should not enroll without valid student name", function () {
     expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid name"))
 });
 
-test("Should not enroll without valid student cpf", function () {
-    const enrollStudent = new EnrollStudent();
+test("Should not enroll without valid student cpf", function () {    
     const enrollmentRequest = {
         student: {
             name: "Ana Silva",
@@ -31,7 +43,6 @@ test("Should not enroll without valid student cpf", function () {
 });
 
 test("Should not enroll duplicated student", function () {
-    const enrollStudent = new EnrollStudent();
     const enrollmentRequest = {
         student: {
             name: "Ana Silva",
@@ -46,8 +57,7 @@ test("Should not enroll duplicated student", function () {
     expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Enrollment with duplicated student is not allowed"))
 });
 
-test("Should generate enrollment code", function () {
-    const enrollStudent = new EnrollStudent();
+test("Should generate enrollment code", function () {    
     const enrollmentRequest = {
         student: {
             name: "Maria Carolina Fonseca",
@@ -63,7 +73,6 @@ test("Should generate enrollment code", function () {
 });
 
 test("Should generate enrollment codes", function () {
-    const enrollStudent = new EnrollStudent();
     const enrollmentRequest = {
         student: {
             name: "Maria Carolina Fonseca",
@@ -92,7 +101,6 @@ test("Should generate enrollment codes", function () {
 });
 
 test("Should not enroll student with invalid level", function () {
-    const enrollStudent = new EnrollStudent();
     const enrollmentRequest = {
         student: {
             name: "Maria Carolina Fonseca",
@@ -107,7 +115,6 @@ test("Should not enroll student with invalid level", function () {
 });
 
 test("Should not enroll student with invalid module", function () {
-    const enrollStudent = new EnrollStudent();
     const enrollmentRequest = {
         student: {
             name: "Maria Carolina Fonseca",
@@ -122,7 +129,6 @@ test("Should not enroll student with invalid module", function () {
 });
 
 test("Should not enroll student below minimum age", function () {
-    const enrollStudent = new EnrollStudent();
     const enrollmentRequest = {
         student: {
             name: "Maria Carolina Fonseca",
@@ -137,7 +143,6 @@ test("Should not enroll student below minimum age", function () {
 });
 
 test("Should not enroll student with invalid class", function () {
-    const enrollStudent = new EnrollStudent();
     const enrollmentRequest = {
         student: {
             name: "Maria Carolina Fonseca",
@@ -152,7 +157,6 @@ test("Should not enroll student with invalid class", function () {
 });
 
 test("Should not enroll student over class capacity", function () {
-    const enrollStudent = new EnrollStudent();
     let enrollmentRequest = {
         student: {
             name: "Maria Carolina Fonseca",
