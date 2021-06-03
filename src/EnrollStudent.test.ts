@@ -23,9 +23,10 @@ test("Should not enroll without valid student name", function () {
         },
         level: "EM",
         module: "1",
-        class: "A"        
+        class: "A",
+        installments: 1
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid name"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid name"));
 });
 
 test("Should not enroll without valid student cpf", function () {    
@@ -37,9 +38,10 @@ test("Should not enroll without valid student cpf", function () {
         },
         level: "EM",
         module: "1",
-        class: "A"        
+        class: "A",
+        installments: 1
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid CPF"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Invalid CPF"));
 });
 
 test("Should not enroll duplicated student", function () {
@@ -51,10 +53,11 @@ test("Should not enroll duplicated student", function () {
         },
         level: "EM",
         module: "1",
-        class: "A"        
+        class: "A",
+        installments: 1
     };
     enrollStudent.execute(enrollmentRequest);
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Enrollment with duplicated student is not allowed"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Enrollment with duplicated student is not allowed"));
 });
 
 test("Should generate enrollment code", function () {    
@@ -66,7 +69,8 @@ test("Should generate enrollment code", function () {
         },
         level: "EM",
         module: "1",
-        class: "A"
+        class: "A",
+        installments: 1
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
     expect(enrollment.code).toEqual("2021EM1A0001");
@@ -81,7 +85,8 @@ test("Should generate enrollment codes", function () {
         },
         level: "EM",
         module: "1",
-        class: "A"
+        class: "A",
+        installments: 1
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
     expect(enrollment.code).toEqual("2021EM1A0001");
@@ -94,7 +99,8 @@ test("Should generate enrollment codes", function () {
         },
         level: "EM",
         module: "1",
-        class: "A"
+        class: "A",
+        installments: 1
     };
     const enrollment2= enrollStudent.execute(enrollmentRequest2);
     expect(enrollment2.code).toEqual("2021EM1A0002");
@@ -109,9 +115,10 @@ test("Should not enroll student with invalid level", function () {
         },
         level: "ES",
         module: "4",
-        class: "A"
+        class: "A",
+        installments: 1
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Level not found"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Level not found"));
 });
 
 test("Should not enroll student with invalid module", function () {
@@ -123,9 +130,10 @@ test("Should not enroll student with invalid module", function () {
         },
         level: "EM",
         module: "4",
-        class: "A"
+        class: "A",
+        installments: 1
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Module not found"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Module not found"));
 });
 
 test("Should not enroll student below minimum age", function () {
@@ -137,9 +145,10 @@ test("Should not enroll student below minimum age", function () {
         },
         level: "EM",
         module: "1",
-        class: "A"
+        class: "A",
+        installments: 1
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Student below minimum age"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Student below minimum age"));
 });
 
 test("Should not enroll student with invalid class", function () {
@@ -151,9 +160,10 @@ test("Should not enroll student with invalid class", function () {
         },
         level: "EM",
         module: "3",
-        class: "B"
+        class: "D",
+        installments: 1
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Class not found"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Class not found"));
 });
 
 test("Should not enroll student over class capacity", function () {
@@ -165,7 +175,8 @@ test("Should not enroll student over class capacity", function () {
         },
         level: "EM",
         module: "3",
-        class: "A"
+        class: "A",
+        installments: 1
     };
     enrollStudent.execute(enrollmentRequest);
     enrollmentRequest = {
@@ -176,7 +187,8 @@ test("Should not enroll student over class capacity", function () {
         },
         level: "EM",
         module: "3",
-        class: "A"
+        class: "A",
+        installments: 1
     };
     enrollStudent.execute(enrollmentRequest);
     enrollmentRequest = {
@@ -187,7 +199,54 @@ test("Should not enroll student over class capacity", function () {
         },
         level: "EM",
         module: "3",
-        class: "A"
+        class: "A",
+        installments: 1
     };
-    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Class is over capacity"))
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Class is over capacity"));
+});
+
+test("Should not enroll after the end of the class", function () {
+    const enrollmentRequest = {
+        student: {
+            name: "Maria Carolina Fonseca",
+            cpf: "755.525.774-26",
+            birthDate: "2002-03-12"
+        },
+        level: "EM",
+        module: "3",
+        class: "B",
+        installments: 1
+    };
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Class is already finished"));
+});
+
+test("Should not enroll after 25% of the start of the class", function () {
+    const enrollmentRequest = {
+        student: {
+            name: "Maria Carolina Fonseca",
+            cpf: "755.525.774-26",
+            birthDate: "2002-03-12"
+        },
+        level: "EM",
+        module: "3",
+        class: "C",
+        installments: 1
+    };
+    expect(() => enrollStudent.execute(enrollmentRequest)).toThrow(new Error("Class is already started"));
+});
+
+test("Should generate the invoices based on the number of installments, rounding each amount and applying the rest in the last invoice", function () {
+    const enrollmentRequest = {
+        student: {
+            name: "Maria Carolina Fonseca",
+            cpf: "755.525.774-26",
+            birthDate: "2002-03-12"
+        },
+        level: "EM",
+        module: "3",
+        class: "A",
+        installments: 11
+    };
+    const enrollment= enrollStudent.execute(enrollmentRequest);
+    expect(enrollment.invoices.length).toEqual(enrollmentRequest.installments);
 });

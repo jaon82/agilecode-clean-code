@@ -3,6 +3,7 @@ import IClassRepository from "./IClassRepository";
 import IEnrollmentRepository from "./IEnrollmentRepository";
 import ILevelRepository from "./ILevelRepository";
 import IModuleRepository from "./IModuleRepository";
+import Invoice from "./Invoice";
 import Student from "./Student";
 
 interface IStudentRequest{
@@ -15,7 +16,8 @@ interface IEnrollmentRequest{
     student: IStudentRequest
     level: string,
     module: string,
-    class: string
+    class: string,
+    installments: number
 }
 
 export default class EnrollStudent {
@@ -55,6 +57,19 @@ export default class EnrollStudent {
         return enrollmentCode;
     }
 
+    generateInvoices(modulePrice: number, installments: number): Invoice[] {
+        const invoices:Invoice[] = [];
+        let invoicePrice = Math.floor((modulePrice/installments)*100)/100;
+        for(let i=1; i <= installments; i++){
+            if(i === installments){
+                invoicePrice = Math.ceil((modulePrice-(invoicePrice*(installments-1)))*100)/100;
+            }
+            const invoice = new Invoice(invoicePrice);
+            invoices.push(invoice);
+        }
+        return invoices;
+    }
+
     execute(enrollmentRequest: IEnrollmentRequest) : Enrollment {
         const student = new Student(enrollmentRequest.student.name, enrollmentRequest.student.cpf, enrollmentRequest.student.birthDate);
         const level = this.levelRepository.findByCode(enrollmentRequest.level);
@@ -69,17 +84,24 @@ export default class EnrollStudent {
         if(!clazz){
             throw new Error("Class not found");
         }
-        if(this.existingEnrollment(student.cpf.value)){
-            throw new Error("Enrollment with duplicated student is not allowed");
-        }
         if(!this.hasAllowedAge(student, module.minimumAge)){
             throw new Error("Student below minimum age");
+        }
+        if(!clazz.isFinished()){
+            throw new Error("Class is already finished");
+        }
+        if(clazz.isOutOfEnrollTime()){
+            throw new Error("Class is already started");
         }
         if(!this.hasClassCapacity(clazz.capacity, enrollmentRequest.level, enrollmentRequest.module, enrollmentRequest.class)){
             throw new Error("Class is over capacity");
         }
+        if(this.existingEnrollment(student.cpf.value)){
+            throw new Error("Enrollment with duplicated student is not allowed");
+        }
         const code = this.generateEnrollmentCode(enrollmentRequest);
-        const enrollment = new Enrollment(student, level.code, module.code, clazz.code, code);
+        const invoices = this.generateInvoices(module.price, enrollmentRequest.installments);
+        const enrollment = new Enrollment(student, level.code, module.code, clazz.code, code, invoices);
         this.enrollmentRepository.save(enrollment);
         return enrollment;
     }
