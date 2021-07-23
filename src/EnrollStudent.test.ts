@@ -73,7 +73,7 @@ test("Should generate enrollment code", function () {
         installments: 1
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
-    expect(enrollment.code).toEqual("2021EM1A0001");
+    expect(enrollment.code.value).toEqual("2021EM1A0001");
 });
 
 test("Should generate enrollment codes", function () {
@@ -89,7 +89,7 @@ test("Should generate enrollment codes", function () {
         installments: 1
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
-    expect(enrollment.code).toEqual("2021EM1A0001");
+    expect(enrollment.code.value).toEqual("2021EM1A0001");
 
     const enrollmentRequest2 = {
         student: {
@@ -103,7 +103,7 @@ test("Should generate enrollment codes", function () {
         installments: 1
     };
     const enrollment2= enrollStudent.execute(enrollmentRequest2);
-    expect(enrollment2.code).toEqual("2021EM1A0002");
+    expect(enrollment2.code.value).toEqual("2021EM1A0002");
 });
 
 test("Should not enroll student with invalid level", function () {
@@ -249,4 +249,6 @@ test("Should generate the invoices based on the number of installments, rounding
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
     expect(enrollment.invoices.length).toEqual(enrollmentRequest.installments);
+    expect(enrollment.invoices[0].value).toEqual(1545.45);
+    expect(enrollment.invoices[10].value).toEqual(1545.5);
 });

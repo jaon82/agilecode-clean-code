@@ -7,7 +7,21 @@ export default class Classroom {
     endDate: Date;
 
 
-    constructor (level: string, module: string, code: string, capacity: number, startDate: string, endDate: string) {
+    constructor ({
+        level, 
+        module, 
+        code, 
+        capacity, 
+        startDate, 
+        endDate
+    }:{
+        level: string, 
+        module: string, 
+        code: string, 
+        capacity: number, 
+        startDate: string, 
+        endDate: string
+    }) {
          this.level = level;
          this.module = module;
          this.code = code;
@@ -16,13 +30,13 @@ export default class Classroom {
          this.endDate = new Date(endDate);
     }
 
-    isFinished() {
-        return Date.now()-this.endDate.getTime() <= 0;
+    isFinished(currentDate: Date) {
+        return currentDate.getTime() > this.endDate.getTime();
     }
 
-    isOutOfEnrollTime() {
+    isOutOfEnrollTime(currentDate: Date) {
         const quarterTime = (this.endDate.getTime()-this.startDate.getTime())*0.25;
-        const passedTime = (Date.now()-this.startDate.getTime());
+        const passedTime = (currentDate.getTime()-this.startDate.getTime());
         return passedTime > quarterTime;
     }
 }

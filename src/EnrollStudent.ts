@@ -42,32 +42,9 @@ export default class EnrollStudent {
         return !!this.enrollmentRepository.findByCpf(cpf);
     }
 
-    hasAllowedAge(student: Student, minimumAge: number): boolean {
-        return student.getAge() >= minimumAge;
-    }
-
     hasClassCapacity(classCapacity: number, level: string, moduleCode: string, classCode: string): boolean {
         const studentsInClass = this.enrollmentRepository.findAllByClass(level, moduleCode, classCode);
         return studentsInClass.length < classCapacity;
-    }
-
-    generateEnrollmentCode(enrollment: IEnrollmentRequest): string{
-        const sequence = (this.enrollmentRepository.count()+1).toString().padStart(4,"0");
-        let enrollmentCode = `${(new Date()).getFullYear()}${enrollment.level}${enrollment.module}${enrollment.class}${sequence}`;
-        return enrollmentCode;
-    }
-
-    generateInvoices(modulePrice: number, installments: number): Invoice[] {
-        const invoices:Invoice[] = [];
-        let invoicePrice = Math.floor((modulePrice/installments)*100)/100;
-        for(let i=1; i <= installments; i++){
-            if(i === installments){
-                invoicePrice = Math.ceil((modulePrice-(invoicePrice*(installments-1)))*100)/100;
-            }
-            const invoice = new Invoice(invoicePrice);
-            invoices.push(invoice);
-        }
-        return invoices;
     }
 
     execute(enrollmentRequest: IEnrollmentRequest) : Enrollment {
@@ -84,24 +61,15 @@ export default class EnrollStudent {
         if(!classroom){
             throw new Error("Class not found");
         }
-        if(!this.hasAllowedAge(student, module.minimumAge)){
-            throw new Error("Student below minimum age");
-        }
-        if(!classroom.isFinished()){
-            throw new Error("Class is already finished");
-        }
-        if(classroom.isOutOfEnrollTime()){
-            throw new Error("Class is already started");
-        }
         if(!this.hasClassCapacity(classroom.capacity, enrollmentRequest.level, enrollmentRequest.module, enrollmentRequest.class)){
             throw new Error("Class is over capacity");
         }
         if(this.existingEnrollment(student.cpf.value)){
             throw new Error("Enrollment with duplicated student is not allowed");
         }
-        const code = this.generateEnrollmentCode(enrollmentRequest);
-        const invoices = this.generateInvoices(module.price, enrollmentRequest.installments);
-        const enrollment = new Enrollment(student, level.code, module.code, classroom.code, code, invoices);
+        const issueDate = new Date();
+        const enrollmentSequence = this.enrollmentRepository.count()+1;
+        const enrollment = new Enrollment(student, level, module, classroom, issueDate, enrollmentSequence, enrollmentRequest.installments);
         this.enrollmentRepository.save(enrollment);
         return enrollment;
     }
