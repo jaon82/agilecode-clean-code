@@ -1,5 +1,5 @@
 import Enrollment from "./Enrollment";
-import IClassRepository from "./IClassRepository";
+import IClassroomRepository from "./IClassroomRepository";
 import IEnrollmentRepository from "./IEnrollmentRepository";
 import ILevelRepository from "./ILevelRepository";
 import IModuleRepository from "./IModuleRepository";
@@ -23,13 +23,13 @@ interface IEnrollmentRequest{
 export default class EnrollStudent {
     levelRepository: ILevelRepository;
     moduleRepository: IModuleRepository;
-    classRepository: IClassRepository;
+    classRepository: IClassroomRepository;
     enrollmentRepository: IEnrollmentRepository;
 
     constructor (
         levelRepository: ILevelRepository, 
         moduleRepository: IModuleRepository, 
-        classRepository: IClassRepository, 
+        classRepository: IClassroomRepository, 
         enrollmentRepository: IEnrollmentRepository
     ) {
         this.levelRepository = levelRepository;
@@ -80,20 +80,20 @@ export default class EnrollStudent {
         if(!module){
             throw new Error("Module not found");
         }
-        const clazz = this.classRepository.findByCode(level.code, module.code, enrollmentRequest.class);
-        if(!clazz){
+        const classroom = this.classRepository.findByCode(level.code, module.code, enrollmentRequest.class);
+        if(!classroom){
             throw new Error("Class not found");
         }
         if(!this.hasAllowedAge(student, module.minimumAge)){
             throw new Error("Student below minimum age");
         }
-        if(!clazz.isFinished()){
+        if(!classroom.isFinished()){
             throw new Error("Class is already finished");
         }
-        if(clazz.isOutOfEnrollTime()){
+        if(classroom.isOutOfEnrollTime()){
             throw new Error("Class is already started");
         }
-        if(!this.hasClassCapacity(clazz.capacity, enrollmentRequest.level, enrollmentRequest.module, enrollmentRequest.class)){
+        if(!this.hasClassCapacity(classroom.capacity, enrollmentRequest.level, enrollmentRequest.module, enrollmentRequest.class)){
             throw new Error("Class is over capacity");
         }
         if(this.existingEnrollment(student.cpf.value)){
@@ -101,7 +101,7 @@ export default class EnrollStudent {
         }
         const code = this.generateEnrollmentCode(enrollmentRequest);
         const invoices = this.generateInvoices(module.price, enrollmentRequest.installments);
-        const enrollment = new Enrollment(student, level.code, module.code, clazz.code, code, invoices);
+        const enrollment = new Enrollment(student, level.code, module.code, classroom.code, code, invoices);
         this.enrollmentRepository.save(enrollment);
         return enrollment;
     }

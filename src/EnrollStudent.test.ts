@@ -1,4 +1,4 @@
-import ClassRepositoryMemory from "./ClassRepositoryMemory";
+import ClassroomRepositoryMemory from "./ClassroomRepositoryMemory";
 import EnrollmentRepositoryMemory from "./EnrollmentRepositoryMemory";
 import EnrollStudent from "./EnrollStudent";
 import LevelRepositoryMemory from "./LevelRepositoryMemory";
@@ -10,7 +10,7 @@ beforeEach(function () {
     const enrollmentRepository = new EnrollmentRepositoryMemory();
     const levelRepository = new LevelRepositoryMemory();
     const moduleRepository = new ModuleRepositoryMemory();
-    const classRepository = new ClassRepositoryMemory();
+    const classRepository = new ClassroomRepositoryMemory();
     enrollStudent = new EnrollStudent(levelRepository, moduleRepository, classRepository, enrollmentRepository);
 });
 

@@ -1,7 +1,7 @@
-import Class from "./Class";
-import IClassRepository from "./IClassRepository";
+import Classroom from "./Classroom";
+import IClassroomRepository from "./IClassroomRepository";
 
-export default class ClassRepositoryMemory implements IClassRepository {
+export default class ClassroomRepositoryMemory implements IClassroomRepository {
     classes: any[];
 
     constructor () {
@@ -42,9 +42,9 @@ export default class ClassRepositoryMemory implements IClassRepository {
     }
 
     findByCode(level: string, module: string, code: string) {
-        const clazz = this.classes.find(classData => classData.level === level && classData.module === module && classData.code === code)
-        if (!clazz) throw new Error("Class not found");
-        const classObj = new Class(clazz.level, clazz.module, clazz.code, clazz.capacity, clazz.startDate, clazz.endDate);
+        const classroom = this.classes.find(classData => classData.level === level && classData.module === module && classData.code === code)
+        if (!classroom) throw new Error("Class not found");
+        const classObj = new Classroom(classroom.level, classroom.module, classroom.code, classroom.capacity, classroom.startDate, classroom.endDate);
         return classObj;
     }
 }

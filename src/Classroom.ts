@@ -1,4 +1,4 @@
-export default class Class {
+export default class Classroom {
     level: string;
     module: string;
     code: string;

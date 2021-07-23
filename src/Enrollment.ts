@@ -5,15 +5,15 @@ export default class Enrollment {
     student: Student;
     level: string;
     module: string;
-    clazz: string;
+    classroom: string;
     code: string;
     invoices: Invoice[];
     
-    constructor (student: Student, level: string, module: string, clazz: string, code: string, invoices: Invoice[]) {
+    constructor (student: Student, level: string, module: string, classroom: string, code: string, invoices: Invoice[]) {
         this.student = student;
         this.level = level;
         this.module = module;
-        this.clazz = clazz;
+        this.classroom = classroom;
         this.code = code;
         this.invoices = invoices;
     }
