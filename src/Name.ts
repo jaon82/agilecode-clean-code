@@ -9,10 +9,7 @@ export default class Name {
     }
 
     validateName(name: string){
-        if(!/^([A-Za-z]+ )+([A-Za-z])+$/.test(name)){
-            return false;
-        }
-        return true;
+        return /^([A-Za-z]+ )+([A-Za-z])+$/.test(name);
     }
 
 }

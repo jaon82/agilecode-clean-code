@@ -73,7 +73,7 @@ test("Should generate enrollment code", function () {
         installments: 1
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
-    expect(enrollment.code.value).toEqual("2021EM1A0001");
+    expect(enrollment.code.value).toEqual("2022EM1A0001");
 });
 
 test("Should generate enrollment codes", function () {
@@ -89,7 +89,7 @@ test("Should generate enrollment codes", function () {
         installments: 1
     };
     const enrollment= enrollStudent.execute(enrollmentRequest);
-    expect(enrollment.code.value).toEqual("2021EM1A0001");
+    expect(enrollment.code.value).toEqual("2022EM1A0001");
 
     const enrollmentRequest2 = {
         student: {
@@ -103,7 +103,7 @@ test("Should generate enrollment codes", function () {
         installments: 1
     };
     const enrollment2= enrollStudent.execute(enrollmentRequest2);
-    expect(enrollment2.code.value).toEqual("2021EM1A0002");
+    expect(enrollment2.code.value).toEqual("2022EM1A0002");
 });
 
 test("Should not enroll student with invalid level", function () {
@@ -141,7 +141,7 @@ test("Should not enroll student below minimum age", function () {
         student: {
             name: "Maria Carolina Fonseca",
             cpf: "755.525.774-26",
-            birthDate: "2007-03-12"
+            birthDate: "2008-03-12"
         },
         level: "EM",
         module: "1",
