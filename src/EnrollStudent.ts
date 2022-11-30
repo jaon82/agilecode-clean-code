@@ -3,7 +3,7 @@ import IClassroomRepository from "./IClassroomRepository";
 import IEnrollmentRepository from "./IEnrollmentRepository";
 import ILevelRepository from "./ILevelRepository";
 import IModuleRepository from "./IModuleRepository";
-import Invoice from "./Invoice";
+import IRepositoryAbstractFactory from "./IRepositoryAbstractFactory";
 import Student from "./Student";
 
 interface IStudentRequest{
@@ -27,15 +27,12 @@ export default class EnrollStudent {
     enrollmentRepository: IEnrollmentRepository;
 
     constructor (
-        levelRepository: ILevelRepository, 
-        moduleRepository: IModuleRepository, 
-        classRepository: IClassroomRepository, 
-        enrollmentRepository: IEnrollmentRepository
+        repositoryFactory: IRepositoryAbstractFactory
     ) {
-        this.levelRepository = levelRepository;
-        this.moduleRepository = moduleRepository;
-        this.classRepository = classRepository;
-        this.enrollmentRepository = enrollmentRepository;
+        this.levelRepository = repositoryFactory.createLevelRepository();
+        this.moduleRepository = repositoryFactory.createModuleRepository();
+        this.classRepository = repositoryFactory.createClassroomRepository();
+        this.enrollmentRepository = repositoryFactory.createEnrollmentRepository();
     }
 
     existingEnrollment(cpf: string): boolean {

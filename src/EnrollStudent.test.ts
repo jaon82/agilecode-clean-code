@@ -1,17 +1,10 @@
-import ClassroomRepositoryMemory from "./ClassroomRepositoryMemory";
-import EnrollmentRepositoryMemory from "./EnrollmentRepositoryMemory";
 import EnrollStudent from "./EnrollStudent";
-import LevelRepositoryMemory from "./LevelRepositoryMemory";
-import ModuleRepositoryMemory from "./ModuleRepositoryMemory";
+import RepositoryMemoryFactory from "./RepositoryMemoryFactory";
 
 let enrollStudent: EnrollStudent;
 
 beforeEach(function () {
-    const enrollmentRepository = new EnrollmentRepositoryMemory();
-    const levelRepository = new LevelRepositoryMemory();
-    const moduleRepository = new ModuleRepositoryMemory();
-    const classRepository = new ClassroomRepositoryMemory();
-    enrollStudent = new EnrollStudent(levelRepository, moduleRepository, classRepository, enrollmentRepository);
+    enrollStudent = new EnrollStudent(new RepositoryMemoryFactory());
 });
 
 test("Should not enroll without valid student name", function () {  
